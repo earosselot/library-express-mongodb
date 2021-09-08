@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #[em Local Library]
+
+  h3 Dinamic content
+
+  if error
+    p Error getting dynamic content.
+  else
+    p The library has the following record counts:
+
+    ul
+      li #[strong Books:] !{bookCount}
+      li #[strong Copies:] !{bookInstanceCount}
+      li #[strong Copies available:] !{bookInstanceAvailableCount}
+      li #[strong Authors:] !{authorCount}
+      li #[strong Genres:] !{genreCount}
+
+
