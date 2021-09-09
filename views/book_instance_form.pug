@@ -16,11 +16,21 @@ block content
 
     div.form-group
       label(for='imprint') Imprint:
-      input#imprint.form-control(type='text' placeholder='Publisher and date information' name='imprint' required='true' value=(bookInstance===undefined ? '' : bookInstance.imprint))
+      input#imprint.form-control(
+          type='text'
+          placeholder='Publisher and date information'
+          name='imprint'
+          required='true'
+          value=(undefined===bookInstance ? '' : bookInstance.imprint)
+      )
 
     div.form-group
       label(for='due_back') Date when book available:
-      input#due_back.form-control(type='date' name='due_back' value=(bookInstance===undefined ? '' : bookInstance.due_back_form_formatted))
+      input#due_back.form-control(
+          type='date'
+          name='due_back'
+          value=(undefined===bookInstance ? '' : bookInstance.due_back_form_formatted)
+      )
 
     div.form-group
       label(for='status') Status:

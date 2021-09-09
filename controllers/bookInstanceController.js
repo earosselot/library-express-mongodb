@@ -120,7 +120,6 @@ exports.bookInstance_update_get = async (req, res, next) => {
     if (!bookInstance) {
       res.redirect('/catalog/bookinstances');
     } else {
-      console.log(bookInstance.due_back_form_formatted);
       res.render('book_instance_form', { title: 'Update Book Instance', bookInstance, bookList });
     }
   } catch (error) {
@@ -131,21 +130,22 @@ exports.bookInstance_update_get = async (req, res, next) => {
 // Handle bookinstance update on POST.
 exports.bookInstance_update_post = [
 
-  (req, res, next) => {
-    next();
-  },
-
   // Validate and sanitise fields.
   body('book', 'Book must be specified').trim().isLength({ min: 4 }).escape(),
   body('imprint', 'Imprint must be specified').trim()
     .isLength({ min: 4 }).withMessage('imprint must have at least 4 characters')
     .escape(),
   body('status').escape(),
-  body('due_back', 'Invalid date').optional({ checkFalsy: true }).isISO8601().toDate(),
+  body('due_back', 'Invalid date').optional({ checkFalsy: true }).isISO8601(),
+
+  // body('due_back', 'Invalid date').optional({ checkFalsy: true }).isISO8601().toDate(),
 
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
+
+      // Added this to tell the Book Instance model that the date is in tz -03 (Argentina)
+      req.body.due_back = `${req.body.due_back}T00:00:00-03:00`
 
       const bookInstance = new BookInstance({
         book: req.body.book,
@@ -154,6 +154,7 @@ exports.bookInstance_update_post = [
         status: req.body.status,
         _id: req.params.id
       })
+
       if (!errors.isEmpty()) {
         // todo: when clicking several times on submit with not valid data,
         //  the due_date goes back in time 1 day on every request.

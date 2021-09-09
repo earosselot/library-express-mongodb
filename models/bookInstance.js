@@ -29,12 +29,7 @@ BookInstanceSchema
 BookInstanceSchema
   .virtual('due_back_form_formatted')
   .get(function() {
-    // todo: the date is not diplaying well on update.
-    const date = this.due_back.getUTCDate();
-    const year = this.due_back.getUTCFullYear();
-    const month = this.due_back.getUTCMonth();
-    console.log(`${year}-${month}-${date}`);
-    return `${year}-${month}-${date}`;
+    return format(this.due_back, 'yyyy-MM-dd');
   });
 
 module.exports = mongoose.model('BookInstance', BookInstanceSchema);

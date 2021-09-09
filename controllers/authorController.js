@@ -40,8 +40,8 @@ exports.author_create_post = [
     .isAlphanumeric().withMessage('First name has non-alphanumeric characters.'),
   body('family_name').trim().isLength({ min: 1 }).escape().withMessage('Family name is required.')
     .isAlphanumeric().withMessage('Family name has non-alphanumeric characters.'),
-  body('date_of_birth', 'Invalid date of birth').optional({ checkFalsy: true}).isISO8601().toDate(),
-  body('date_of_death', 'Invalid date of death').optional({ checkFalsy: true}).isISO8601().toDate(),
+  body('date_of_birth', 'Invalid date of birth').optional({ checkFalsy: true}).isISO8601(),
+  body('date_of_death', 'Invalid date of death').optional({ checkFalsy: true}).isISO8601(),
 
   // Process request after validation and sanitization.
   async (req, res, next) => {
@@ -49,9 +49,17 @@ exports.author_create_post = [
       // Extract the validation errors from a request.
       const errors = validationResult(req);
 
+      // Added this to tell the Book Instance model that the date is in tz -03 (Argentina)
+      req.body.date_of_birth = `${req.body.date_of_birth}T00:00:00-03:00`
+      req.body.date_of_death = `${req.body.date_of_death}T00:00:00-03:00`
+
+
       if (!errors.isEmpty()) {
-        res.render('author_form', { title: 'Create Author', author: req.body, errors: errors.array()});
-        return;
+        res.render('author_form', {
+          title: 'Create Author',
+          author: req.body,
+          errors: errors.array()
+        });
       }
       else {
         const author = new Author({
@@ -79,7 +87,11 @@ exports.author_delete_get = async (req, res, next) => {
     if (!author) {
       res.redirect('/catalog/authors');
     } else {
-      res.render('author_delete', { title: 'Delete Author', author, authorBooks });
+      res.render('author_delete', {
+        title: 'Delete Author',
+        author,
+        authorBooks
+      });
     }
   } catch (error) {
     next(error);
@@ -105,14 +117,68 @@ exports.author_delete_post = async (req, res, next) => {
 };
 
 // Display Author update on GET.
-exports.author_update_get = (req, res) => {
-  res.send('NOT IMPLEMENTED AUTHOR update GET');
+exports.author_update_get = async (req, res, next) => {
+  try {
+    const authorId = req.params.id;
+    const author = await Author.findById(authorId);
+    if (!author) {
+      res.redirect('/catalog/authors');
+    } else {
+      res.render('author_form', { title: 'Update Author', author });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
 // Handle Author update on POST.
-exports.author_update_post = (req, res) => {
-  res.send('NOT IMPLEMENTED AUTHOR update POST');
-};
+exports.author_update_post = [
+
+  // Validate and sanitize fields.
+  body('first_name').trim().isLength({ min: 1 }).escape().withMessage('First name is required.')
+    .isAlphanumeric().withMessage('First name has non-alphanumeric characters.'),
+  body('family_name').trim().isLength({ min: 1 }).escape().withMessage('Family name is required.')
+    .isAlphanumeric().withMessage('Family name has non-alphanumeric characters.'),
+  body('date_of_birth', 'Invalid date of birth').optional({ checkFalsy: true}).isISO8601(),
+  body('date_of_death', 'Invalid date of death').optional({ checkFalsy: true}).isISO8601(),
+
+  // Process request after validation and sanitization.
+  async (req, res, next) => {
+    try {
+      // Extract the validation errors from a request.
+      const errors = validationResult(req);
+
+      const authorId = req.params.id;
+
+      // Added this to tell the Book Instance model that the date is in tz -03 (Argentina)
+      req.body.date_of_birth = `${req.body.date_of_birth}T00:00:00-03:00`
+      req.body.date_of_death = `${req.body.date_of_death}T00:00:00-03:00`
+
+      const author = new Author({
+        first_name: req.body.first_name,
+        family_name: req.body.family_name,
+        date_of_birth: req.body.date_of_birth,
+        date_of_death: req.body.date_of_death,
+        _id: authorId
+      });
+
+      if (!errors.isEmpty()) {
+        res.render('author_form', {
+          title: 'Update Author',
+          author,
+          errors: errors.array()
+        });
+      }
+      else {
+
+        const updatedAuthor = await Author.findByIdAndUpdate(authorId, author, {})
+        res.redirect(updatedAuthor.url);
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+];
 
 
 
