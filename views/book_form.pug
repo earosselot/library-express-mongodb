@@ -13,10 +13,12 @@ block content
         - authors.sort(function(a, b) {let textA = a.family_name.toUpperCase(); let textB = b.family_name.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
         for author in authors
           if book
+            // Update case
             // TODO: corregir MDN la parte de selected=...
             // https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/forms/Create_book_form
             option(value=author._id selected=(author._id.toString() === book.author._id.toString())) #{author.name}
           else
+            // Create case
             option(value=author._id) #{author.name}
     div.form-group
       label(for='summary') Summary:

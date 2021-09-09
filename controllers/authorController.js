@@ -90,13 +90,13 @@ exports.author_delete_get = async (req, res, next) => {
 exports.author_delete_post = async (req, res, next) => {
   try {
     const [ author, authorBooks ] = await Promise.all([
-      Author.findById(req.params.id),
+      Author.findById(req.body.authorid),
       Book.find({ 'author': req.body.authorid })
     ]);
     if (authorBooks.length > 0) {
       res.render('author_delete', { title: 'Delete Author', author, authorBooks });
     } else {
-      await Author.findOneAndRemove(req.body.authorid);
+      await Author.findByIdAndRemove(req.body.authorid);
       res.redirect('/catalog/authors');
     }
   } catch (error) {
