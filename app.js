@@ -7,7 +7,7 @@ const compression = require('compression');
 const helmet = require('helmet');
 require('dotenv').config();
 
-const { MONGOUSER, MONGOPASS } = process.env;
+const { MONGOUSER, MONGOPASS, PROD_MONGODB_URL } = process.env;
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -17,7 +17,8 @@ const app = express();
 
 // mongoDB setup
 const mongoose = require('mongoose');
-const mongoDB = `mongodb+srv://${MONGOUSER}:${MONGOPASS}@cluster0.fvux7.mongodb.net/local_library?retryWrites=true&w=majority`;
+const dev_mongoDB_url = `mongodb+srv://${MONGOUSER}:${MONGOPASS}@cluster0.fvux7.mongodb.net/local_library?retryWrites=true&w=majority`;
+const mongoDB = PROD_MONGODB_URL || dev_mongoDB_url;
 mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedtopology: true});
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
