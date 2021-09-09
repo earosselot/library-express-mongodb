@@ -3,7 +3,9 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-require('dotenv').config()
+const compression = require('compression');
+const helmet = require('helmet');
+require('dotenv').config();
 
 const { MONGOUSER, MONGOPASS } = process.env;
 
@@ -18,6 +20,12 @@ const mongoose = require('mongoose');
 const mongoDB = `mongodb+srv://${MONGOUSER}:${MONGOPASS}@cluster0.fvux7.mongodb.net/local_library?retryWrites=true&w=majority`;
 mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedtopology: true});
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+// Protection against vulnerabilities
+app.use(helmet());
+
+// Compress all routes
+app.use(compression());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
