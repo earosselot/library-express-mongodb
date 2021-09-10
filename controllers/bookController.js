@@ -18,6 +18,7 @@ exports.index = async (req, res) => {
       ])
     res.render('index', { title: 'Library Home', bookCount, bookInstanceCount, bookInstanceAvailableCount, authorCount, genreCount});
   } catch (error) {
+    console.error(error);
     res.render('index', { error });
   }
 };
