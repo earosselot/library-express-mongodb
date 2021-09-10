@@ -42,16 +42,24 @@ exports.bookInstance_create_get = async (req, res, next) => {
 exports.bookInstance_create_post = [
 
   // Validate and sanitise fields.
-  body('book', 'Book must be specified').trim().isLength({ min: 1 }).escape(),
-  body('imprint', 'Imprint must be specified').trim().isLength({ min: 1 }).escape(),
+  body('book', 'Book must be specified').trim().isLength({ min: 5 }).escape(),
+  body('imprint', 'Imprint must be specified').trim().isLength({ min: 5 }).escape(),
   body('status').escape(),
-  body('due_back', 'Invalid date').optional({ checkFalsy: true }).isISO8601().toDate(),
+  body('due_back', 'Invalid date').optional({ checkFalsy: true }).isISO8601(),
 
   // Process request after validation and sanitization.
   async (req, res, next) => {
     try {
       // Extract the validation errors from the request.
       const errors = validationResult(req);
+
+      // Custom status-date compatibility check.
+      if (req.body.status !== 'Available' && !req.body.due_back) {
+        errors.errors.push({
+          msg: 'If book status is not Available, you should indicate a due date',
+        });
+      }
+      req.body.due_back = req.body.due_back ? `${req.body.due_back}T00:00:00-03:00` : '';
 
       // Create a BookInstance object with escaped and trimmed data.
       const bookInstance = new BookInstance({
@@ -60,6 +68,7 @@ exports.bookInstance_create_post = [
         status: req.body.status,
         due_back: req.body.due_back
       })
+
 
       if (!errors.isEmpty()) {
         // There are errors. Render the form with sanitized values and errors messages.
@@ -131,9 +140,9 @@ exports.bookInstance_update_get = async (req, res, next) => {
 exports.bookInstance_update_post = [
 
   // Validate and sanitise fields.
-  body('book', 'Book must be specified').trim().isLength({ min: 4 }).escape(),
+  body('book', 'Book must be specified').trim().isLength({ min: 1 }).escape(),
   body('imprint', 'Imprint must be specified').trim()
-    .isLength({ min: 4 }).withMessage('imprint must have at least 4 characters')
+    .isLength({ min: 1 }).withMessage('imprint must have at least 4 characters')
     .escape(),
   body('status').escape(),
   body('due_back', 'Invalid date').optional({ checkFalsy: true }).isISO8601(),
@@ -144,8 +153,15 @@ exports.bookInstance_update_post = [
     try {
       const errors = validationResult(req);
 
+      // Custom status-date compatibility check.
+      if (req.body.status !== 'Available' && !req.body.due_back) {
+        errors.errors.push({
+          msg: 'If book status is not Available, you should indicate a due date',
+        });
+      }
+
       // Added this to tell the Book Instance model that the date is in tz -03 (Argentina)
-      req.body.due_back = `${req.body.due_back}T00:00:00-03:00`
+      req.body.due_back = req.body.due_back ? `${req.body.due_back}T00:00:00-03:00` : '';
 
       const bookInstance = new BookInstance({
         book: req.body.book,
@@ -156,8 +172,6 @@ exports.bookInstance_update_post = [
       })
 
       if (!errors.isEmpty()) {
-        // todo: when clicking several times on submit with not valid data,
-        //  the due_date goes back in time 1 day on every request.
         const bookList = await Book.find({});
         res.render('book_instance_form', { title: 'Update Book Instance', bookInstance, bookList, errors: errors.array() });
       } else {

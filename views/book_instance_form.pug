@@ -29,7 +29,7 @@ block content
       input#due_back.form-control(
           type='date'
           name='due_back'
-          value=(undefined===bookInstance ? '' : bookInstance.due_back_form_formatted)
+          value=(undefined===bookInstance || bookInstance.due_back === null ? '' : bookInstance.due_back_form_formatted)
       )
 
     div.form-group
