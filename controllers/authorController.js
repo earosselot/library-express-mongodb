@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const Author = require('../models/author');
 const Book = require('../models/book');
+var differenceInDays = require('date-fns/differenceInDays');
 
 // Display list of all authors
 exports.author_list = async (req, res, next) => {
@@ -50,9 +51,23 @@ exports.author_create_post = [
       const errors = validationResult(req);
 
       // Added this to tell the Book Instance model that the date is in tz -03 (Argentina)
-      req.body.date_of_birth = `${req.body.date_of_birth}T00:00:00-03:00`
-      req.body.date_of_death = `${req.body.date_of_death}T00:00:00-03:00`
+      req.body.date_of_birth = req.body.date_of_birth ? `${req.body.date_of_birth}T00:00:00-03:00` : '';
+      req.body.date_of_death = req.body.date_of_death ? `${req.body.date_of_death}T00:00:00-03:00` : '';
 
+      const author = new Author({
+        first_name: req.body.first_name,
+        family_name: req.body.family_name,
+        date_of_birth: req.body.date_of_birth,
+        date_of_death: req.body.date_of_death
+      });
+
+      // Custom birth-death date checker.
+      if (author.date_of_birth instanceof Date && author.date_of_death instanceof Date &&
+        differenceInDays(author.date_of_death, author.date_of_birth) <= 0) {
+        errors.errors.push({
+          msg: 'By the time this app was created, in our universe, Authors still cannot die before his own birth.',
+        });
+      }
 
       if (!errors.isEmpty()) {
         res.render('author_form', {
@@ -62,12 +77,6 @@ exports.author_create_post = [
         });
       }
       else {
-        const author = new Author({
-          first_name: req.body.first_name,
-          family_name: req.body.family_name,
-          date_of_birth: req.body.date_of_birth,
-          date_of_death: req.body.date_of_death
-        });
         await author.save();
         res.redirect(author.url);
       }
@@ -151,8 +160,16 @@ exports.author_update_post = [
       const authorId = req.params.id;
 
       // Added this to tell the Book Instance model that the date is in tz -03 (Argentina)
-      req.body.date_of_birth = `${req.body.date_of_birth}T00:00:00-03:00`
-      req.body.date_of_death = `${req.body.date_of_death}T00:00:00-03:00`
+      req.body.date_of_birth = req.body.date_of_birth ? `${req.body.date_of_birth}T00:00:00-03:00` : '';
+      req.body.date_of_death = req.body.date_of_death ? `${req.body.date_of_death}T00:00:00-03:00` : '';
+
+      // Custom birth-death date checker.
+      if (author.date_of_birth instanceof Date && author.date_of_death instanceof Date &&
+        differenceInDays(author.date_of_death, author.date_of_birth) <= 0) {
+        errors.errors.push({
+          msg: 'By the time this app was created, in our universe, Authors still cannot die before his own birth.',
+        });
+      }
 
       const author = new Author({
         first_name: req.body.first_name,
@@ -170,7 +187,6 @@ exports.author_update_post = [
         });
       }
       else {
-
         const updatedAuthor = await Author.findByIdAndUpdate(authorId, author, {})
         res.redirect(updatedAuthor.url);
       }
@@ -179,17 +195,3 @@ exports.author_update_post = [
     }
   }
 ];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
