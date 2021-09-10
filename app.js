@@ -19,7 +19,8 @@ const app = express();
 const mongoose = require('mongoose');
 const dev_mongoDB_url = `mongodb+srv://${MONGOUSER}:${MONGOPASS}@cluster0.fvux7.mongodb.net/local_library?retryWrites=true&w=majority`;
 const mongoDB = PROD_MONGODB_URL || dev_mongoDB_url;
-mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedtopology: true});
+console.log(mongoDB)
+mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedtopology: true });
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // Protection against vulnerabilities
