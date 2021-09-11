@@ -116,8 +116,8 @@ exports.book_create_post = [
       }
       else {
         // Data from form is valid. Save Book.
-        await book.save();
-        res.redirect(book.url);
+        const newBook = await book.save();
+        res.redirect(newBook.url);
       }
     } catch (error) {
       next(error);
