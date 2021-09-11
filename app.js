@@ -21,6 +21,9 @@ const dev_mongoDB_url = `mongodb+srv://${MONGOUSER}:${MONGOPASS}@cluster0.fvux7.
 const mongoDB = PROD_MONGODB_URL || dev_mongoDB_url;
 console.log(mongoDB)
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedtopology: true });
+mongoose.connection.on('connecting', () => console.log('Connecting to MongoDB...'));
+mongoose.connection.on('connected', () => console.log('Connection to MongoDB is established'));
+mongoose.connection.on('disconnected', () => console.log('Connection to MongoDB is closed'));
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // Protection against vulnerabilities
