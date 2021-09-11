@@ -21,7 +21,6 @@ console.log('starting app...');
 const mongoose = require('mongoose');
 const dev_mongoDB_url = `mongodb+srv://${MONGOUSER}:${MONGOPASS}@cluster0.fvux7.mongodb.net/local_library?retryWrites=true&w=majority`;
 const mongoDB = PROD_MONGO_URL || dev_mongoDB_url;
-console.log(mongoDB)
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedtopology: true });
 mongoose.connection.on('connecting', () => console.log('Connecting to MongoDB...'));
 mongoose.connection.on('connected', () => console.log('Connection to MongoDB is established'));
@@ -38,7 +37,7 @@ app.use(compression());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-app.use(logger('dev'));
+app.use(logger('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
