@@ -15,6 +15,8 @@ const catalogRouter = require('./routes/catalog');
 
 const app = express();
 
+console.log('starting app...');
+
 // mongoDB setup
 const mongoose = require('mongoose');
 const dev_mongoDB_url = `mongodb+srv://${MONGOUSER}:${MONGOPASS}@cluster0.fvux7.mongodb.net/local_library?retryWrites=true&w=majority`;
